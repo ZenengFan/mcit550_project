@@ -1,0 +1,71 @@
+#change the date format to be year and month
+CREATE TABLE DIFF
+with temp1 as
+(SELECT DATE_FORMAT(date, "%Y-%M") as Year_Month, state, confirmed_cases
+FROM us-states),
+
+#this is latest month
+temp2 as
+(SELECT MAX(Year_Month) as latest_month
+FROM temp1),
+
+#this is the begining of the interval, 6 month ago
+temp3 as
+(SELECT date_sub(latest_month, interval 6 month) as starting_month 
+FROM temp2),
+
+#this is the all the confirmed cases group by state and year_month during this period
+temp4 as (SELECT Year_Month, state, sum(confirmed_cases) as total_cases
+FROM temp1
+GROUP BY Year_Month, state
+HAVING Year_Month >= (SELECT starting_month FROM temp4),
+
+#select the data from beigining of the period to the latest second month
+temp5 as (SELECT Year_Month, state, total_cases
+FROM temp4
+WHERE Year_Month >= (SELECT starting_month FROM temp4) and Year_Month < (SELECT latest_month FROM temp2)),
+
+#select the data from 5 months ago to the latest month
+temp6 as (SELECT Year_Month, state, total_cases
+FROM temp4
+WHERE Year_Month > (SELECT starting_month FROM temp4) and Year_Month <= (SELECT latest_month FROM temp2)),
+
+#add one month to tmep5 so we can caculate the rolling difference
+temp7 as (SELECT date_add(Year_Month, interval 1 month) as Year_Month, state, total_cases
+FROM temp5),
+
+#calculate the rolling difference between neighboring months
+Select (temp6.total_cases - temp7.total_cases) as difference, Year_Month, state
+FROM temp6, temp7
+WHERE temp6.state = temp7.state and temp6.Year_Month = temp7.Year_Month
+
+
+#Using moving average of difference to predict
+#Calculate the moving average
+with temp1 as(SELECT state, average(difference)
+FROM DIFF
+GROUP BY state),
+
+#change the date format to be year and month
+temp2 as
+(SELECT DATE_FORMAT(date, "%Y-%M") as Year_Month, state, confirmed_cases
+FROM us-states),
+
+#this is latest month
+temp3 as
+(SELECT MAX(Year_Month) as latest_month
+FROM temp1),
+
+#this is the all the confirmed cases group by state and year_month in the latest month
+temp4 as (SELECT Year_Month, state, sum(confirmed_cases) as total_cases
+FROM temp1
+GROUP BY Year_Month, state
+HAVING Year_Month = (SELECT latest_month FROM temp3),
+
+
+
+
+
+
+
+
