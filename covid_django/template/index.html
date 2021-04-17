@@ -1,0 +1,30 @@
+<html lang="en" dir="ltr">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<body>
+    <h1>Here is our project shell!</h1>
+    <h2>If AWS, Django back-end, and JavaScript/HTML front-end all working correctly, we should see bar graph of states' populations!</h2>
+    <canvas id="myChart"></canvas>
+</body>
+    <script>
+        const data = {
+            /*need to mark context data "safe" when passing it to javascript code;
+            this prevents the data from being html escaped / converted into an html element */
+            labels: {{statesNameList|safe}},
+            datasets: [{
+                label: 'State Populations Pulled From AWS RDS',
+                backgroundColor: 'rgb(255, 99, 132)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: {{statesPopList|safe}},
+            }]
+        };
+        const config = {
+            type: 'bar',
+            data,
+            options: {}
+        };
+        var myChart = new Chart(
+            document.getElementById('myChart'),
+            config
+        );
+    </script>
+</html>
