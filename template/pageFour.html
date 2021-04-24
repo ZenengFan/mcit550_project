@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <!--Rending a map of the United States-->
+    <title>US COVID-19 Map</title>
+    <!-- <link rel="stylesheet" type="text/css" href="css/style.css"> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.0.0/raphael-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
+    <script src="https://cdn.rawgit.com/NewSignature/us-map/0677afad/jquery.usmap.js"></script>
+</head>
+<body style="margin: auto;width: 50%;font-family:Trebuchet MS; background-color:#17202A;">
+    <h1 style="color: #F7F9F9">COVID-19 Data at a State Level</h1>
+    <div class="container">
+    	<h2 style="color: #F7F9F9">
+            Click on states to gain valuable insights
+        </h2>
+        <form id="form_test">
+            <textarea readonly id="text_data" name="text_data" rows="5" cols="60">Interesting insights will be displayed here as you click on the map.
+            </textarea>  
+        </form>
+    </div>
+    
+    <div id="map" style="width: 500px; height: 300px"></div>
+    <script>
+        var newLine = "\r\n";
+        var statesNameList = {{statesNameList|safe}};
+        var abbStatesList = {{abbStatesList|safe}};
+        var statesPopList = {{statesPopList|safe}};
+        var totalVaccinationsList = {{totalVaccinationsList|safe}};
+        var vaccinationRateList = {{vaccinationRateList|safe}};
+        var vaccinationRankList = {{vaccinationRankList|safe}};
+        $(document).ready(function() {
+            /** Initializing the map **/
+            $('#map').usmap({
+                stateStyles: {fill: '#5DADE2'},
+                stateHoverStyles: {fill: '#6C3483'},
+                'click' : function(event, data) {
+                    var stateIndex = abbStatesList.indexOf(data.name);
+                    var abbState = data.name;
+                    var stateName = statesNameList[abbStatesList.indexOf(abbState)];
+                    var statePop = statesPopList[abbStatesList.indexOf(abbState)];
+                    var stateTotalVac = totalVaccinationsList[abbStatesList.indexOf(abbState)];
+                    var stateVacRate = vaccinationRateList[abbStatesList.indexOf(abbState)];
+                    var stateVacRank = vaccinationRankList[abbStatesList.indexOf(abbState)];
+                    document.querySelector('#text_data').innerHTML = 
+                        "State: " + stateName + newLine + 
+                        "Population: " + statePop + newLine + 
+                        "Total vaccinations: " + stateTotalVac + newLine + 
+                        "Vaccination rate (% of population): " + stateVacRate + newLine + 
+                        "Vaccination rank (1 = highest vaccine rate): " + stateVacRank;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
