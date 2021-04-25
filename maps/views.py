@@ -108,7 +108,41 @@ def pageFour(request):
 
 #Ken can take ownership and version control of this function and webpage
 def pageFive(request):
-    return render(request, 'pageFive.html')
+    mydb = mysql.connector.connect(
+        host="cis550-proj.chge9gphb71b.us-east-1.rds.amazonaws.com",
+        user="admin",
+        password="CIS550_Upenn",
+        database="cis550proj"
+    )
+    mycursor = mydb.cursor()
+    
+    #querying and formatting mask data for input into chartjs graph
+    mycursor.execute("select * from predicted")
+    tempList = mycursor.fetchall()
+    statesMaskPerc = [item[0] for item in tempList]
+    statesMaskName = [item[1] for item in tempList]
+    
+    
+    #querying and formatting sentiment data for input into highchart map
+    mycursor.execute("select * from predicted")
+    tempList2 = mycursor.fetchall()    
+    predictedCases = [item[0] for item in tempList2]
+    statesSentAbbrev = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+    for item in predictedCases:
+        predictedCases[predictedCases.index(item)]=float(item)
+    jsonListSent=[]
+    for i in range(0,len(statesSentAbbrev)):
+        jsonListSent.append({'value' : predictedCases[i], 'code' : statesSentAbbrev[i]})
+
+    jsonFinalMap = json.dumps(jsonListSent)
+    
+
+    #in context, we just list python variables we want to use in 
+    # our html file, and what we want them to be named in the html file;
+    # here, I just use the same name for both
+    #showMap='True'
+    context={'statesMaskName':statesMaskName, 'statesMaskPerc':statesMaskPerc, 'jsonFinalMap':jsonFinalMap}
+    return render(request, 'pageFive.html', context)
 
 #if anyone wants to create additional functions and webpages, feel free (and comment your name on it)
 

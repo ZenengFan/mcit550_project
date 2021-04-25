@@ -1,6 +1,304 @@
 <html lang="en" dir="ltr">
-<body>
-    <h1>This is page 5 of our web app!</h1>
-    <h2>Its url is http://localhost:8000/coviddatadash/pageFive/ </h2>
-</body>
+    <head>
+    
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
+    <style>
+        
+        body{        
+            
+            padding-top: 80px;
+            padding-bottom: 40px;
+            font-family:Trebuchet MS;
+            background-color:#17202A;
+        }
+
+        .fixed-header, .fixed-footer{
+            margin: 0 auto;
+            text-align: center;
+            width: 100%;
+            position: fixed;        
+            background: #17202A;
+            color: #F7F9F9;
+        }
+        .fixed-header{
+            top: 0;
+        }
+        .fixed-footer{
+            bottom: 0;
+        }
+        .container{
+            width: 90%;
+            margin: 0 auto; /* Center the DIV horizontally */
+        }
+          #mapUS {
+            padding-top: 0%;
+            position: fixed;
+            right: 7%;
+            margin: 0 auto;
+            width: 90%;
+            /*width: 50vw;*/
+            
+        }
+        .loading {
+            margin-top: 10em;
+            text-align: center;
+            color: gray;
+        }
+   /*     #chartdiv {
+            width: 60%;
+            height: 300px;
+            position: fixed;
+            right: 4%;
+            bottom: 0%;
+            
+        }*/
+    </style>
+    </head>
+  
+
+    <body>
+        <div class="fixed-header">
+            <h1>Predicted COVID-19 Cases and ICU Shortage</h1>
+        </div>
+        <div class="container">
+            <!-- <div class="col-lg-4" style="float: left;  max-height: 6500px;max-width:400px;overflow: scroll; overflow-x:hidden;">
+                <div style="background-color: #17202A;">
+                    <span style="color: #F7F9F9; text-align: center;"><h4>% Population Who "Frequently" or "Always" Wear Masks When In Public Within 6" of Others (as of July 2-14, 2020)</h4></span>
+                </div>
+                <div class="col-lg-12">
+                    
+                    <form method="post" enctype="multipart/form-data" action="selectState">
+                        {% csrf_token %}
+                        <div class="col-lg-4" style="float: left; max-height: 1360px;">
+                            <br><br style="line-height: 15px"/>
+                            {% for state in statesMaskName %}
+                                <table style="border-width: 2px; border: #333;">
+                                    <tr>
+                                    <input type="submit" value="{{state}}" name="clickedState" style="height:21px; width:130px;">
+                                    </tr>
+                                </table>
+                            {% endfor%}
+                        </div>
+                        <div style="float: left;">
+                            <canvas id="myBarChart" height="1335" width="250"></canvas>
+                        </div>
+                    </form>
+                </div>
+            </div>     -->    
+            <div class="col-lg-8">
+                
+                    <div id="mapUS"></div>
+                
+                    <!-- <div id="chartdiv"></div> -->
+                
+            </div>
+        </div>
+        <br>
+    </body>
+
+    <!--barchart script-->
+    <script>
+        const labels = {{statesMaskName|safe}};
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: '% Population',
+                color: 'gold',
+                backgroundColor: 'gold',
+                borderColor: 'gold',
+                data: {{statesMaskPerc|safe}},
+            }]
+        };
+        const config = {
+            type: 'bar',
+            data,
+            options: {
+                indexAxis: 'y',
+                color: 'white',
+                scales: {
+                    y: {
+                        grid: {
+                            color: '#b3b1ad',
+                        },
+                        ticks: {
+                            color: 'white',
+                        },
+                        display: false
+                    },
+                    x: {
+                        grid: {
+                            color: '#b3b1ad',
+                        },
+                        ticks: {
+                            color: 'white',
+                            // Include a % sign in the ticks
+                            callback: function(value, index, values) {
+                            return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        var myChart = new Chart(
+            document.getElementById('myBarChart'),
+            config
+        );
+    </script>
+
+    <!--usMap resources-->
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/mapdata/countries/us/us-all.js"></script>
+
+    <!--usMap scripts-->
+    <script type="text/javascript">
+
+    Highcharts.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/us-population-density.json', function (data) {
+
+        // Make codes uppercase to match the map data
+        data.forEach(function (p) {
+            p.code = p.code.toUpperCase();
+        }); 
+
+        // Instantiate the map
+        Highcharts.mapChart('mapUS', {
+
+            chart: {
+                map: 'countries/us/us-all',
+                borderWidth: 0,
+                backgroundColor: '#17202A'
+            },
+
+            title: {
+                text: 'Predicted Covid-19 Cases for One Month',
+                style: {
+                    color: 'white'}
+            },
+
+            exporting: {
+                sourceWidth: 600,
+                sourceHeight: 500
+            },
+
+            legend: {
+                layout: 'vertical',
+                borderWidth: 0,
+                backgroundColor: 'rgba(255,255,255,0.85)',
+                floating: true,
+                align: 'right',
+                verticalAlign: 'top',
+                y: 25
+            },
+
+            mapNavigation: {
+                enabled: true
+            },
+
+            colorAxis: {
+                min: 1,
+                type: 'linear',
+                minColor: '#ffeeee',
+                maxColor: '#ff0000',
+                stops: [
+                    [0, '#ffeeee'],
+                    [0.7, '#FE2E2E'],
+                    [1, '#ff0000']
+                ]
+            },
+
+            series: [{
+                animation: {
+                    duration: 1000
+                },
+                data: {{jsonFinalMap|safe}},
+                joinBy: ['postal-code', 'code'],
+                dataLabels: {
+                    enabled: true,
+                    color: '#FFFFFF',
+                    format: '{point.code}'
+                },
+                name: 'Predicted Cases:',
+                tooltip: {
+                    pointFormat: ' {point.code}: {point.value}'
+                }
+            }]
+        });
+    });
+    </script>
+
+    <!-- Lollipop Chart Resources -->
+    <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/themes/material.js"></script>
+
+    <!-- Lollipop Chart script -->
+    <script>
+        am4core.ready(function() {
+
+        // Themes begin
+        am4core.useTheme(am4themes_material);
+        // Themes end
+
+        var chart = am4core.create("chartdiv", am4charts.XYChart);
+
+        var data = [];
+        var value = {{clickedY|safe}};
+
+            var names = {{clickedX|safe}};
+
+        for (var i = 0; i < names.length; i++) {
+            data.push({ category: names[i], value: value[i]});
+        }
+
+        chart.data = data;
+        
+        var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+        categoryAxis.renderer.grid.template.location = 0;
+        categoryAxis.dataFields.category = "category";
+        categoryAxis.renderer.minGridDistance = 15;
+        categoryAxis.renderer.grid.template.location = 0.5;
+        categoryAxis.renderer.grid.template.strokeDasharray = "1,3";
+        categoryAxis.renderer.labels.template.rotation = -90;
+        categoryAxis.renderer.labels.template.horizontalCenter = "left";
+        categoryAxis.renderer.labels.template.location = 0.5;
+        categoryAxis.renderer.labels.template.fill = am4core.color("white");
+
+        categoryAxis.renderer.labels.template.adapter.add("dx", function(dx, target) {
+            return -target.maxRight / 2;
+        })
+
+        var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.tooltip.disabled = true;
+        valueAxis.renderer.ticks.template.disabled = true;
+        valueAxis.renderer.axisFills.template.disabled = true;
+        valueAxis.renderer.labels.template.fill = am4core.color("white");
+        valueAxis.title.text = "{{clickedState|safe}} Neg. Posts";
+        valueAxis.title.fill = am4core.color("white");
+
+
+        var series = chart.series.push(new am4charts.ColumnSeries());
+        series.dataFields.categoryX = "category";
+        series.dataFields.valueY = "value";
+        series.tooltipText = "{valueY.value}";
+        series.sequencedInterpolation = true;
+        series.fillOpacity = 0;
+        series.strokeOpacity = 1;
+        series.strokeDashArray = "1,3";
+        series.columns.template.width = 0.01;
+        series.tooltip.pointerOrientation = "horizontal";
+
+        var bullet = series.bullets.create(am4charts.CircleBullet);
+
+        chart.cursor = new am4charts.XYCursor();
+
+        chart.scrollbarX = new am4core.Scrollbar();
+        chart.scrollbarY = new am4core.Scrollbar();
+
+        }); // end am4core.ready()
+    </script>
+
 </html>
