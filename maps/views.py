@@ -117,7 +117,7 @@ def pageFive(request):
     mycursor = mydb.cursor()
     
     #querying and formatting mask data for input into chartjs graph
-    mycursor.execute("select state,floor(ICU_shortage) as shortage from WARNING_STATE LIMIT 30")
+    mycursor.execute("select state, ICU_shortage as shortage from WARNING_STATE LIMIT 30")
     predicted = mycursor.fetchall()
     print(predicted)
     states = [item[0] for item in predicted]
@@ -135,7 +135,7 @@ def pageFive(request):
     predictedCases = [item[0] for item in tempList2]
     statesSentAbbrev = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
     for item in predictedCases:
-        predictedCases[predictedCases.index(item)]=float(item)
+        predictedCases[predictedCases.index(item)]=int(item)
     jsonListSent=[]
     for i in range(0,len(statesSentAbbrev)):
         jsonListSent.append({'value' : predictedCases[i], 'code' : statesSentAbbrev[i]})
