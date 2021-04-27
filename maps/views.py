@@ -117,11 +117,17 @@ def pageFive(request):
     mycursor = mydb.cursor()
     
     #querying and formatting mask data for input into chartjs graph
-    mycursor.execute("select * from predicted")
-    tempList = mycursor.fetchall()
-    statesMaskPerc = [item[0] for item in tempList]
-    statesMaskName = [item[1] for item in tempList]
-    
+    mycursor.execute("select state,floor(ICU_shortage) as shortage from WARNING_STATE LIMIT 30")
+    predicted = mycursor.fetchall()
+    print(predicted)
+    states = [item[0] for item in predicted]
+    ICU_shortage = [int(item[1]) for item in predicted]
+    # total_beds = [item[2] for item in predicted]
+    # ICU_pred = [item[3] for item in predicted]
+    # mycursor.execute("WITH CS1 AS (SELECT cts.Name, cts.State, m.Frequently, m.Always FROM Masks m JOIN Counties cts ON (m.FIPS = cts.FIPS)) SELECT CS1.State, AVG((CS1.Frequently+CS1.Always)*100) AS Perc_High_Frequency FROM CS1 WHERE CS1.State<>'Puerto Rico' GROUP BY CS1.State ORDER BY Perc_High_Frequency DESC")
+    # tempList = mycursor.fetchall()
+    # states = [item[0] for item in tempList]
+    # ICU_shortage = [item[1] for item in tempList]
     
     #querying and formatting sentiment data for input into highchart map
     mycursor.execute("select * from predicted")
@@ -141,7 +147,8 @@ def pageFive(request):
     # our html file, and what we want them to be named in the html file;
     # here, I just use the same name for both
     #showMap='True'
-    context={'statesMaskName':statesMaskName, 'statesMaskPerc':statesMaskPerc, 'jsonFinalMap':jsonFinalMap}
+    # context={'states':states, 'ICU_shortage':ICU_shortage,'total_beds':total_beds, 'ICU_pred':ICU_pred, 'jsonFinalMap':jsonFinalMap, 'predicted':predicted}
+    context={'states':states, 'ICU_shortage':ICU_shortage,'jsonFinalMap':jsonFinalMap}
     return render(request, 'pageFive.html', context)
 
 #if anyone wants to create additional functions and webpages, feel free (and comment your name on it)
