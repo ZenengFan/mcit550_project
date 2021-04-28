@@ -1,47 +1,23 @@
 from django.shortcuts import render
-
-# MPC note: imports go here, e.g., MySQL extension (see next line re install)
-# MPC note: ***to import mysql.connector, make sure to install mysql-connector while inside mcit550_project file directory in terminal!
-#           ***command for installing in Ubuntu is: pip install mysql-connector-python; once installed, we can import it
 import mysql.connector
 from decimal import Decimal
 import json
 
-# Create your views here.
-
-def index(request):
-    
-    #code to make db connection --- will need to edit this so it's outside the function, so that we don't need to call it inside each function.
-    #for now, we can just include it in each function as needed, unless someone feels like fixing it now
-    mydb = mysql.connector.connect(
+# Establishing conneciton to AWS RDS
+mydb = mysql.connector.connect(
         host="cis550-proj.chge9gphb71b.us-east-1.rds.amazonaws.com",
         user="admin",
         password="CIS550_Upenn",
         database="cis550proj"
     )
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT Name FROM States")
-    #fetchall cmd is tricky, its result comes in form of list of tuples.
-    #In this case, the javascript requires a simple list, so we reformat
-    #using index function.
-    statesNameList = [item[0] for item in mycursor.fetchall()]
-    mycursor.execute("SELECT Population FROM States")
-    statesPopList = [item[0] for item in mycursor.fetchall()]
 
-    #in context, we just list python variables we want to use in 
-    # our html file, and what we want them to be named in the html file;
-    # here, I just use the same name for both
-    context={'statesNameList':statesNameList, 'statesPopList':statesPopList}
-    return render(request,'index.html',context)
+#homepage function
+def index(request):
+    return render(request,'index.html')
 
 #Mike can take ownership and version control of this function/webpage
 def pageTwo(request):
-    mydb = mysql.connector.connect(
-        host="cis550-proj.chge9gphb71b.us-east-1.rds.amazonaws.com",
-        user="admin",
-        password="CIS550_Upenn",
-        database="cis550proj"
-    )
+   
     mycursor = mydb.cursor()
     
     #querying and formatting mask data for input into chartjs graph
@@ -63,27 +39,37 @@ def pageTwo(request):
 
     jsonFinalMap = json.dumps(jsonListSent)
     
-
-    #in context, we just list python variables we want to use in 
-    # our html file, and what we want them to be named in the html file;
-    # here, I just use the same name for both
-    #showMap='True'
     context={'statesMaskName':statesMaskName, 'statesMaskPerc':statesMaskPerc, 'jsonFinalMap':jsonFinalMap}
     return render(request, 'pageTwo.html', context)
 
 #Zeneng can take ownership and version control of this function and its html page
 def pageThree(request):
-    return render(request, 'pageThree.html')
+    mycursor = mydb.cursor()
+    
+    #querying and formatting mask data for input into chartjs graph
+    mycursor.execute("select * from warning_state order by ICU_possible_shortage DESC")
+    predicted = mycursor.fetchall()
+    states = [item[0] for item in predicted]
+    ICU_shortage = [int(item[1]) for item in predicted]
+    
+    #querying and formatting sentiment data for input into highchart map
+    mycursor.execute("select * from predicted_cases")
+    tempList2 = mycursor.fetchall()    
+    predictedCases = [item[0] for item in tempList2]
+    statesSentAbbrev = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+    for item in predictedCases:
+        predictedCases[predictedCases.index(item)]=int(item)
+    jsonListSent=[]
+    for i in range(0,len(statesSentAbbrev)):
+        jsonListSent.append({'value' : predictedCases[i], 'code' : statesSentAbbrev[i]})
+
+    jsonFinalMap = json.dumps(jsonListSent)
+    
+    context={'states':states, 'ICU_shortage':ICU_shortage,'jsonFinalMap':jsonFinalMap}
+    return render(request, 'pageThree.html', context)
 
 #Jesus can take ownership and version control of this function and its html page
 def pageFour(request):
-    # Getting data from AWS
-    mydb = mysql.connector.connect(
-        host="cis550-proj.chge9gphb71b.us-east-1.rds.amazonaws.com",
-        user="admin",
-        password="CIS550_Upenn",
-        database="cis550proj"
-    )
     count = 0
     abbStatesList = []
     statesNameList = []
@@ -106,53 +92,9 @@ def pageFour(request):
     context={'statesNameList':statesNameList, 'abbStatesList':abbStatesList, 'statesPopList':statesPopList, 'totalVaccinationsList':totalVaccinationsList, 'vaccinationRateList':vaccinationRateList, 'vaccinationRankList':vaccinationRankList}
     return render(request, 'pageFour.html', context)
 
-#Ken can take ownership and version control of this function and webpage
-def pageFive(request):
-    mydb = mysql.connector.connect(
-        host="cis550-proj.chge9gphb71b.us-east-1.rds.amazonaws.com",
-        user="admin",
-        password="CIS550_Upenn",
-        database="cis550proj"
-    )
-    mycursor = mydb.cursor()
-    
-    #querying and formatting mask data for input into chartjs graph
-    mycursor.execute("select * from warning_state order by ICU_possible_shortage DESC")
-    predicted = mycursor.fetchall()
-    print(predicted)
-    states = [item[0] for item in predicted]
-    ICU_shortage = [int(item[1]) for item in predicted]
-    # total_beds = [item[2] for item in predicted]
-    # ICU_pred = [item[3] for item in predicted]
-    # mycursor.execute("WITH CS1 AS (SELECT cts.Name, cts.State, m.Frequently, m.Always FROM Masks m JOIN Counties cts ON (m.FIPS = cts.FIPS)) SELECT CS1.State, AVG((CS1.Frequently+CS1.Always)*100) AS Perc_High_Frequency FROM CS1 WHERE CS1.State<>'Puerto Rico' GROUP BY CS1.State ORDER BY Perc_High_Frequency DESC")
-    # tempList = mycursor.fetchall()
-    # states = [item[0] for item in tempList]
-    # ICU_shortage = [item[1] for item in tempList]
-    
-    #querying and formatting sentiment data for input into highchart map
-    mycursor.execute("select * from predicted_cases")
-    tempList2 = mycursor.fetchall()    
-    predictedCases = [item[0] for item in tempList2]
-    statesSentAbbrev = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
-    for item in predictedCases:
-        predictedCases[predictedCases.index(item)]=int(item)
-    jsonListSent=[]
-    for i in range(0,len(statesSentAbbrev)):
-        jsonListSent.append({'value' : predictedCases[i], 'code' : statesSentAbbrev[i]})
+#helper functions
 
-    jsonFinalMap = json.dumps(jsonListSent)
-    
-
-    #in context, we just list python variables we want to use in 
-    # our html file, and what we want them to be named in the html file;
-    # here, I just use the same name for both
-    #showMap='True'
-    # context={'states':states, 'ICU_shortage':ICU_shortage,'total_beds':total_beds, 'ICU_pred':ICU_pred, 'jsonFinalMap':jsonFinalMap, 'predicted':predicted}
-    context={'states':states, 'ICU_shortage':ICU_shortage,'jsonFinalMap':jsonFinalMap}
-    return render(request, 'pageFive.html', context)
-
-#if anyone wants to create additional functions and webpages, feel free (and comment your name on it)
-
+#function for using buttons in pageTwo's bar graph to select additional state data in lollipop graph
 def stateButtonData(request):
     mydb = mysql.connector.connect(
         host="cis550-proj.chge9gphb71b.us-east-1.rds.amazonaws.com",
@@ -186,16 +128,15 @@ def stateButtonData(request):
     #querying and formatting sentiment data for input into lollipop chart
     mycursor.execute("WITH CS1 AS (SELECT s.WeekStart, s.NumNegtiveSntmnt FROM Sentiments s JOIN Counties cts ON (s.FIPS = cts.FIPS) WHERE cts.State=\'"+clickedState+"\') SELECT CS1.WeekStart, SUM(CS1.NumNegtiveSntmnt) AS Weekly_Negative_Sentiment FROM CS1 GROUP BY WeekStart ORDER BY WeekStart ASC")
     tempList3 = mycursor.fetchall()
-
     clickedXtemp = [item[0] for item in tempList3]    
     clickedYtemp = [item[1] for item in tempList3]
     clickedX = [(item.strftime("%m")+'/'+item.strftime("%d")+'/'+item.strftime("%Y")) for item in clickedXtemp]
     clickedY = [float(item) for item in clickedYtemp]
  
-    #showMap='False'
     context={'statesMaskName':statesMaskName, 'statesMaskPerc':statesMaskPerc, 'clickedX':clickedX, 'clickedY': clickedY, 'clickedState':clickedState, 'jsonFinalMap':jsonFinalMap}
     return render(request, 'pageTwo.html', context)
 
+#helper function for filling pageFour map labels
 def abbreviations(state_complete_name):
     choices = {
         'Alabama': 'AL',

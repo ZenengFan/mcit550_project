@@ -16,7 +16,7 @@
             Click on states to gain valuable insights
         </h2>
         <form id="form_test">
-            <textarea readonly id="text_data" name="text_data" rows="5" cols="60">Interesting insights will be displayed here as you click on the map.
+            <textarea readonly id="text_data" name="text_data" rows="5" cols="60" style="color: #F7F9F9; font-family:Trebuchet MS; background-color:#17202A">Interesting insights will be displayed here as you click on the map.
             </textarea>  
         </form>
     </div>
@@ -43,7 +43,7 @@
                     var stateTotalVac = totalVaccinationsList[abbStatesList.indexOf(abbState)];
                     var stateVacRate = vaccinationRateList[abbStatesList.indexOf(abbState)];
                     var stateVacRank = vaccinationRankList[abbStatesList.indexOf(abbState)];
-                    document.querySelector('#text_data').innerHTML = 
+                    document.querySelector('#text_data').innerHTML =
                         "State: " + stateName + newLine + 
                         "Population: " + statePop + newLine + 
                         "Total vaccinations: " + stateTotalVac + newLine + 

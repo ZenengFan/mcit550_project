@@ -1,31 +1,195 @@
-<html lang="en" dir="ltr">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<body>
-    <h1>Here is our project shell!</h1>
-    <h2>If AWS, Django back-end, and JavaScript/HTML front-end all working correctly, we should see bar graph of states' populations!</h2>
-    {{statesNameList}}
-    <canvas id="myChart"></canvas>
+{% load static %}
+<!DOCTYPE html>
+<html>
+<title>COVID DataDash</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<body id="myPage">
+
+<!-- Navbar -->
+<div class="w3-top">
+ <div style="background-color: grey; color: white" class="w3-bar w3-left-align">
+  <a href="#" class="w3-bar-item w3-button" style="background-color: grey; color: white; font-family:Trebuchet MS;"><i class="fa fa-home w3-margin-right"></i>Team</a>
+  <a href="#masks" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Masks/Sentiment</a>
+  <a href="#cases" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Cases/ICU Beds</a>
+  <a href="#vaccinations" class="w3-bar-item w3-button w3-hide-small w3-hover-white">Vaccinations</a>
+ </div>
+
+  <!-- Navbar on small screens -->
+  <div id="navDemo" class="w3-bar-block w3-theme-d2 w3-hide w3-hide-large w3-hide-medium">
+    <a href="#team" class="w3-bar-item w3-button">Team</a>
+    <a href="#masks" class="w3-bar-item w3-button">Masks/Sentiment</a>
+    <a href="#cases" class="w3-bar-item w3-button">Cases/ICU Beds</a>
+    <a href="#vaccinations" class="w3-bar-item w3-button">Vaccinations</a>
+  </div>
+</div>
+
+<!-- Team Container -->
+<div class="w3-container w3-padding-64 w3-center" id="team" style="font-family:Trebuchet MS; color: white; background-color:#17202A;">
+<h2>COVID DataDash</h2>
+<p>A COVID-19 analytics dashboard brought to you by:</p>
+
+<div class="w3-row"><br>
+
+<div class="w3-quarter">
+  <img src="{% static 'maps/ironken.jpg' %}" alt="Ken's photo" style="width:45%" class="w3-circle w3-hover-opacity">
+  <h3>Ken Huang</h3>
+  <p>Backend Engineer,</p>
+  <p>AWS Specialist</p>
+</div>
+
+<div class="w3-quarter">
+  <img src="{% static 'maps/jesus.jpg' %}" alt="Jesus's photo" style="width:45%" class="w3-circle w3-hover-opacity">
+  <h3>Jes&uacute;s Pena</h3>
+  <p>Full Stack Developer,</p>
+  <p>Vaccinations Specialist</p>
+</div>
+
+<div class="w3-quarter">
+  <img src="{% static 'maps/zeneng.jpg' %}" alt="Zeneng's photo" style="width:45%" class="w3-circle w3-hover-opacity">
+  <h3>Zeneng Fan</h3>
+  <p>Full Stack Developer,</p>
+  <p>Cases/ICU Beds Specialist</p>
+</div>
+
+<div class="w3-quarter">
+  <img src="{% static 'maps/mike.jpg' %}" alt="Mike's photo" style="width:45%" class="w3-circle w3-hover-opacity">
+  <h3>Michael Cotton</h3>
+  <p>Full Stack Developer,</p>
+  <p>Masks/Sentiment Specialist</p>
+</div>
+
+</div>
+</div>
+
+<!-- Masks/Sentiment Row -->
+<div class="w3-row-padding w3-padding-64" id="masks" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+  <p></p>
+  </div>
+
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+    <h2>Masks Wearing Practices & Social Media Sentiment</h2>
+    <p>Our Mask/Sentiment Dashboard provides invaluable insight into mask wearing practices and COVID-19 social sentiment trends across the United States, focusing on first wave of the virus, during the time period between January-August 2020.  This dashboard uses data gathered from 1) a sample of 14.8 billion unique tweets from 52 million Twitter users filtered and scored using the VADER sentiment analysis tool, and 2) a nation-wide survey of over 250,000 individuals asking the question, "How often do you wear a mask in public when you expect to be within six feet of another person?"</p>
+  </div>
+
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+  
+    <br>
+      <h5 style="text-align: center;">Masks/Sentiment Dashboard</h5>
+      <a href="pageTwo">
+      <img src="{% static 'maps/N95.jpeg' %}" alt="mask photo" style="width:50%; display: block; margin-left: auto; margin-right: auto; background-color:#555659;" class="w3-square w3-hover-opacity">
+      </a>
+      <div class="w3-container">
+      <h5 style="text-align: center;">Dashboard Portal</h5>
+      </div>
+    
+  </div>
+
+<!-- div for spacing -->
+<div class="w3-quarter">
+<p></p>
+</div>
+</div>
+
+<!-- Cases/ICU Row -->
+<div class="w3-row-padding w3-padding-64" id="cases" style="font-family:Trebuchet MS; color: white; background-color:#17202A;">
+  <!-- div for spacing -->
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#17202A;">
+  <p></p>
+  </div>
+
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#17202A;">
+    <h2>Forecasting Cases & ICU Bed Shortages Across States</h2>
+    <p>By 1) drawing data from every hospital in every state across the United States, and 2) analyzing rolling differences to build forecasts, our Cases/ICU Beds Dashboard provides invaluable inight into the spread of COVID-19 and warning signs for depleted hospital resources.</p>
+  </div>
+
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#17202A;">
+  
+    <br>
+      <h5 style="text-align: center;">Cases/ICU Beds Dashboard</h5>
+      <a href="pageThree">
+      <img src="{% static 'maps/icu.jpg' %}" alt="icu photo" style="width:50%; display: block; margin-left: auto; margin-right: auto; background-color:#17202A;" class="w3-square w3-hover-opacity">
+      <a/>
+      <div class="w3-container">
+      <h5 style="text-align: center;">Dashboard Portal</h5>
+      </div>
+    
+  </div>
+<!-- div for spacing -->
+<div class="w3-quarter">
+<p></p>
+</div>
+</div>
+
+<!-- Vaccinations Row -->
+<div class="w3-row-padding w3-padding-64" id="vaccinations" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+  <p></p>
+  </div>
+
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+    <h2>Tracking Vaccination Rates Across States</h2>
+    <p>By compiling vaccination data from every county in every state across the United States, our Vaccinations Dashboard provides invaluable insight into the country's ongoing fight against the virus.  In particular, this dashboard details which states are leading the way in vaccinations, and which states are lagging behind, as of March 8, 2021.</p>
+  </div>
+
+  <div class="w3-quarter" style="font-family:Trebuchet MS; color: white; background-color:#555659;">
+  
+    <br>
+      <h5 style="text-align: center;">Vaccinations Dashboard</h5>
+      <a href="pageFour">
+      <img src="{% static 'maps/N95.jpeg' %}" alt="mask photo" style="width:50%; display: block; margin-left: auto; margin-right: auto; background-color:#555659;" class="w3-square w3-hover-opacity">
+      </a>
+      <div class="w3-container">
+      <h5 style="text-align: center;">Dashboard Portal</h5>
+      </div>
+    
+  </div>
+<!-- div for spacing -->
+<div class="w3-quarter">
+<p></p>
+</div>
+</div>
+
+<!-- Footer -->
+<footer class="w3-container w3-padding-32 w3-theme-d1 w3-center">
+  <h4>Thanks for visiting</h4>
+  <p>Best wishes & be safe!</p>
+
+  <div style="position:relative;bottom:100px;z-index:1;" class="w3-tooltip w3-right">
+    <span class="w3-text w3-padding w3-teal w3-hide-small">Go To Top</span>   
+    <a class="w3-button w3-theme" href="#myPage"><span class="w3-xlarge">
+    <i class="fa fa-chevron-circle-up"></i></span></a>
+  </div>
+</footer>
+
+<script>
+// Script for side navigation
+function w3_open() {
+  var x = document.getElementById("mySidebar");
+  x.style.width = "300px";
+  x.style.paddingTop = "10%";
+  x.style.display = "block";
+}
+
+// Close side navigation
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}
+
+// Used to toggle the menu on smaller screens when clicking on the menu button
+function openNav() {
+  var x = document.getElementById("navDemo");
+  if (x.className.indexOf("w3-show") == -1) {
+    x.className += " w3-show";
+  } else { 
+    x.className = x.className.replace(" w3-show", "");
+  }
+}
+</script>
+
 </body>
-    <script>
-        const data = {
-            /*need to mark context data "safe" when passing it to javascript code;
-            this prevents the data from being html escaped / converted into an html element */
-            labels: {{statesNameList|safe}},
-            datasets: [{
-                label: 'State Populations Pulled From AWS RDS',
-                backgroundColor: 'rgb(255, 99, 132)',
-                borderColor: 'rgb(255, 99, 132)',
-                data: {{statesPopList|safe}},
-            }]
-        };
-        const config = {
-            type: 'bar',
-            data,
-            options: {}
-        };
-        var myChart = new Chart(
-            document.getElementById('myChart'),
-            config
-        );
-    </script>
 </html>
