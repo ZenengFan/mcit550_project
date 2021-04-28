@@ -117,7 +117,7 @@ def pageFive(request):
     mycursor = mydb.cursor()
     
     #querying and formatting mask data for input into chartjs graph
-    mycursor.execute("select state, ICU_shortage as shortage from WARNING_STATE LIMIT 30")
+    mycursor.execute("select * from warning_state order by ICU_possible_shortage DESC")
     predicted = mycursor.fetchall()
     print(predicted)
     states = [item[0] for item in predicted]
@@ -130,7 +130,7 @@ def pageFive(request):
     # ICU_shortage = [item[1] for item in tempList]
     
     #querying and formatting sentiment data for input into highchart map
-    mycursor.execute("select * from predicted")
+    mycursor.execute("select * from predicted_cases")
     tempList2 = mycursor.fetchall()    
     predictedCases = [item[0] for item in tempList2]
     statesSentAbbrev = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
